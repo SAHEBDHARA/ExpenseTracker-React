@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -17,38 +18,27 @@ function Register() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegistration = async (e) => {
     e.preventDefault();
 
-    // Firebase Authentication API endpoint for registration
-    const firebaseRegisterURL =
-      "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDPICmsyhxv2pWB2005nPacWgE4cSbqBAQ"; // Replace with your API key
+    // Get the Firebase Authentication instance
+    const auth = getAuth();
 
     try {
-      const response = await fetch(firebaseRegisterURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          returnSecureToken: true,
-        }),
-      });
+      // Create a new user with the provided email and password
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
 
-      if (response.ok) {
-        // Registration successful, you can handle the response here
-        const data = await response.json();
-        console.log("Registration successful:", data);
-        navigate("/");
-      } else {
-        // Registration failed, handle the error response
-        const errorData = await response.json();
-        console.error("Registration failed:", errorData);
-      }
+      const user = userCredential.user;
+      console.log("Registration successful:", user);
+
+
+      navigate("/");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Registration failed:", error);
     }
   };
 
@@ -56,7 +46,7 @@ function Register() {
     <div className="flex items-center justify-center h-screen">
       <div className="bg-white p-8 rounded shadow-md w-80">
         <h2 className="text-2xl font-semibold mb-4">Register</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleRegistration}>
           <div className="mb-4">
             <label className="block text-gray-600 font-medium">Email</label>
             <input

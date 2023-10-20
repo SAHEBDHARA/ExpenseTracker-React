@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import {  getAuth, signInWithEmailAndPassword  } from "firebase/auth";
+import { AuthContext } from '../../context/authContext';
+import { useContext } from 'react';
 
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [error, seError] = useState(false);
+  const [newerr, setNewerr] = useState("")
+
+
   const navigate = useNavigate()
+  const {dispatch} = useContext(AuthContext)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -20,33 +28,24 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Firebase Authentication API endpoint for logging in
-    const firebaseLoginURL = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDPICmsyhxv2pWB2005nPacWgE4cSbqBAQ'; // Replace with your API key
+    const auth = getAuth();
+    signInWithEmailAndPassword (auth, formData.email, formData.password)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    console.log(user)
+    navigate("/")
+    dispatch({type: "LOGIN", payload: user})
+  })
+  .catch((error) => {
+    seError(true)
+    // console.log(error)
+    const errorCode = error.code;
+    setNewerr(errorCode)
+    console.log(newerr)
 
-    try {
-      const response = await fetch(firebaseLoginURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          returnSecureToken: true,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Login successful:', data);
-        navigate('/')
-      } else {
-        const errorData = await response.json();
-        console.error('Login failed:', errorData);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
+    // ..
+  });
   };
 
   return (
