@@ -1,10 +1,11 @@
 import React from 'react'
+import Navbar from '../components/Navbar/Navbar'
 
 const Home = () => {
   return (
-    <div className='flex justify-center items-center'>
-        <h1>HOME</h1>
-    </div>
+    <>
+    <Navbar/>
+    </>
   )
 }
 
