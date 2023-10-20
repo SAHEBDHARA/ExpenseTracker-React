@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-function Register() {
+function Login() {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -17,18 +17,17 @@ function Register() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Firebase Authentication API endpoint for registration
-    const firebaseRegisterURL =
-      "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDPICmsyhxv2pWB2005nPacWgE4cSbqBAQ"; // Replace with your API key
+    // Firebase Authentication API endpoint for logging in
+    const firebaseLoginURL = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDPICmsyhxv2pWB2005nPacWgE4cSbqBAQ'; // Replace with your API key
 
     try {
-      const response = await fetch(firebaseRegisterURL, {
-        method: "POST",
+      const response = await fetch(firebaseLoginURL, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: formData.email,
@@ -38,25 +37,23 @@ function Register() {
       });
 
       if (response.ok) {
-        // Registration successful, you can handle the response here
         const data = await response.json();
-        console.log("Registration successful:", data);
-        navigate("/");
+        console.log('Login successful:', data);
+        navigate('/')
       } else {
-        // Registration failed, handle the error response
         const errorData = await response.json();
-        console.error("Registration failed:", errorData);
+        console.error('Login failed:', errorData);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
     }
   };
 
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="bg-white p-8 rounded shadow-md w-80">
-        <h2 className="text-2xl font-semibold mb-4">Register</h2>
-        <form onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-semibold mb-4">Login</h2>
+        <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block text-gray-600 font-medium">Email</label>
             <input
@@ -73,7 +70,7 @@ function Register() {
             <input
               type="password"
               className="w-full p-2 border rounded border-gray-300 focus:outline-none focus:border-indigo-500"
-              placeholder="Create a password"
+              placeholder="Enter your password"
               name="password"
               value={formData.password}
               onChange={handleInputChange}
@@ -81,18 +78,17 @@ function Register() {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none"
+            className="w-full py-2 px-4 bg-indigo-600 text-white rounded hover-bg-indigo-700 focus:outline-none"
           >
-            Register
+            Log In
           </button>
         </form>
-
         <span className="block text-center mt-4">
-          Already have an account? <Link to="/login">Login</Link>
+          Create an Account! <Link to="/register">Register</Link>
         </span>
       </div>
     </div>
   );
 }
 
-export default Register;
+export default Login;
