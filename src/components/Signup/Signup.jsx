@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
+import {
+  onAuthStateChanged,
+  reload,
+  signOut,
+} from "firebase/auth";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -9,6 +19,9 @@ function Register() {
     password: "",
   });
   const navigate = useNavigate();
+  const [verificationMessage, setVerificationMessage] = useState("");
+  const [showResendButton, setShowResendButton] = useState(false);
+  const [intervalId, setIntervalId] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,26 +34,57 @@ function Register() {
   const handleRegistration = async (e) => {
     e.preventDefault();
 
-    // Get the Firebase Authentication instance
     const auth = getAuth();
 
     try {
-      // Create a new user with the provided email and password
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
 
-      const user = userCredential.user;
-      console.log("Registration successful:", user);
+      // Send email verification link
+      await sendEmailVerification(userCredential.user);
 
+      setVerificationMessage("Verification email sent. Please check your email and click on the verification link.");
+      setShowResendButton(true);
 
-      navigate("/");
+      // Automatically refresh user state periodically
+      const id = setInterval(async () => {
+        await reload(auth.currentUser);
+        if (auth.currentUser.emailVerified) {
+          clearInterval(id);
+          navigate("/");
+        }
+      }, 1000);
+
+      setIntervalId(id);
+
     } catch (error) {
       console.error("Registration failed:", error);
     }
   };
+
+  const handleResendVerification = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    try {
+      await sendEmailVerification(user);
+      setVerificationMessage("New verification email sent. Please check your email and click on the verification link.");
+    } catch (error) {
+      console.error("Failed to send the verification email:", error);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // Clear the interval when the component unmounts
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [intervalId]);
 
   return (
     <div className="flex items-center justify-center h-screen">
@@ -75,8 +119,17 @@ function Register() {
           >
             Register
           </button>
+          {/* {showResendButton && (
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              className="w-full mt-2 py-2 px-4 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none"
+            >
+              Resend Verification Link
+            </button>
+          )} */}
         </form>
-
+        <p>{verificationMessage}</p>
         <span className="block text-center mt-4">
           Already have an account? <Link to="/login">Login</Link>
         </span>

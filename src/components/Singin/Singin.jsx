@@ -30,6 +30,7 @@ function Login() {
 
     const auth = getAuth();
     signInWithEmailAndPassword (auth, formData.email, formData.password)
+    console.log('clicked')
   .then((userCredential) => {
     // Signed in 
     const user = userCredential.user;
