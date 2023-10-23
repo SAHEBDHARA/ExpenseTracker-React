@@ -41,7 +41,6 @@ const [userData, setUserData] = useState(null);
         });
     }
   }, [currentUser]);
-  console.log(userData)
 
 
   return (

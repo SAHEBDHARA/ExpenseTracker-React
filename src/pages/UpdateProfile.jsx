@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {  ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore"; 
@@ -16,7 +16,7 @@ const Updateprofile = () => {
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
  
-  const {currentUser} = useContext(AuthContext)
+
   const Navigate = useNavigate()
 
   const handleFullNameChange = (e) => {
