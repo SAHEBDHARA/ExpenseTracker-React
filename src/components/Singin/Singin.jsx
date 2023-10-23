@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import {  getAuth, signInWithEmailAndPassword  } from "firebase/auth";
+import {  getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { AuthContext } from '../../context/authContext';
 import { useContext } from 'react';
+
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ function Login() {
   });
   const [error, seError] = useState(false);
   const [newerr, setNewerr] = useState("")
+  const [resetMessage, setResetMeassage] = useState('')
 
 
   const navigate = useNavigate()
@@ -25,29 +27,44 @@ function Login() {
     });
   };
 
+  const handlePasswordReset = async () => {
+    const auth = getAuth();
+    try {
+      await sendPasswordResetEmail(auth, formData.email);
+      // Password reset email sent successfully
+      // You can display a message to the user or redirect to a confirmation page
+      setResetMeassage("Link sent successfully");
+    } catch (error) {
+      // Handle the error, e.g., email not found, server error, etc.
+      console.error(error);
+      setResetMeassage(error.AuthContext.message);
+    }
+  };
+
+
+
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     const auth = getAuth();
-    signInWithEmailAndPassword (auth, formData.email, formData.password)
-    console.log('clicked')
-  .then((userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    console.log(user)
-    navigate("/")
-    dispatch({type: "LOGIN", payload: user})
-  })
-  .catch((error) => {
-    seError(true)
-    // console.log(error)
-    const errorCode = error.code;
-    setNewerr(errorCode)
-    console.log(newerr)
-
-    // ..
-  });
+  
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+  
+      // Signed in 
+      const user = userCredential.user;
+      console.log(user);
+      dispatch({ type: "LOGIN", payload: user });
+      navigate("/");
+    } catch (error) {
+      seError(true);
+      console.error(error);
+      const errorCode = error.code;
+      setNewerr(errorCode);
+      console.log(newerr);
+    }
   };
+  
 
   return (
     <div className="flex items-center justify-center h-screen">
@@ -76,6 +93,9 @@ function Login() {
               onChange={handleInputChange}
             />
           </div>
+          <span onClick={handlePasswordReset} className='block text-center text-red cursor-pointer'>Forgot passowrd?</span>
+          {newerr && <span className='block text-center text-red-700'>{newerr}</span>}
+          {resetMessage && <span className='block text-center text-indigo'>{resetMessage}</span>}
           <button
             type="submit"
             className="w-full py-2 px-4 bg-indigo-600 text-white rounded hover-bg-indigo-700 focus:outline-none"
