@@ -3,9 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import {  ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc } from "firebase/firestore"; 
 import {storage, db} from '../Firebse' 
-import { AuthContext } from "../context/authContext";
-import { getDatabase } from 'firebase/database';
 import { Navigate } from "react-router-dom";
+
 
 
 
