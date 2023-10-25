@@ -23,9 +23,21 @@ function ExpenseForm() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Here, you can handle the form submission, e.g., send the data to the server or save it to a state.
+    try {
+      // Replace 'products' with the name of your Firestore collection
+      const res = await addDoc(collection(db, 'expences' ), {
+        moneyspent: formData.amount,
+        description: formData.description,
+        catagory: formData.category
+      });
+      console.log('Document added to Firestore collection.' , res.id);
+      Navigate('/')
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
     console.log(formData);
   };
 
